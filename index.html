@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Treino PWA</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" defer src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .catch(err => console.error('ServiceWorker registration failed:', err));
+  });
+}
+</script>
+</head>
+<body>
+  <header>
+    <h1>Gerador de Treinos</h1>
+  </header>
+  <main>
+    <form id="workout-form">
+      <label for="duration">Duração (minutos, 5‑60):</label>
+      <input type="number" id="duration" name="duration" min="5" max="60" required />
+
+      <label for="level">Nível:</label>
+      <select id="level" name="level" required>
+        <option value="iniciante">Iniciante</option>
+        <option value="intermediario">Intermediário</option>
+        <option value="avancado">Avançado</option>
+      </select>
+
+      <button type="submit">Gerar treino</button>
+    </form>
+    <section id="result" hidden>
+      <h2>Seu treino</h2>
+      <ul id="exercise-list"></ul>
+      <p id="total-time"></p>
+    </section>
+  </main>
+  <footer>
+    <p>Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener">RepDB (repdb.co)</a></p>
+  </footer>
+</body>
+</html>

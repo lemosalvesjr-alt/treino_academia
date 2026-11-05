@@ -1,0 +1,31 @@
+{
+  "exercises": [
+    {
+      "id": "pushup",
+      "name_pt": "Flexão",
+      "description_pt": "Flexão de braços, mantendo o corpo alinhado.",
+      "image": "pushup.svg",
+      "level": ["iniciante", "intermediario", "avancado"],
+      "base_time_sec": 30,
+      "base_reps": 10
+    },
+    {
+      "id": "squat",
+      "name_pt": "Agachamento",
+      "description_pt": "Agachamento com peso corporal, mantendo postura correta.",
+      "image": "squat.svg",
+      "level": ["iniciante", "intermediario", "avancado"],
+      "base_time_sec": 40,
+      "base_reps": 12
+    },
+    {
+      "id": "lunges",
+      "name_pt": "Avanço",
+      "description_pt": "Avanço alternado de pernas, sem peso.",
+      "image": "lunges.svg",
+      "level": ["iniciante", "intermediario", "avancado"],
+      "base_time_sec": 45,
+      "base_reps": 10
+    }
+  ]
+}

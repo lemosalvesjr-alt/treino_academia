@@ -1,0 +1,12 @@
+{
+  "name": "treino-pwa",
+  "version": "1.0.0",
+  "description": "PWA simples de gerador de treinos para iPhone",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "",
+  "license": "MIT"
+}
