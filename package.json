@@ -5,7 +5,8 @@
   "main": "js/app.js",
   "type": "module",
   "scripts": {
-    "test": "node tests/workout.test.js"
+    "test": "node tests/workout.test.js",
+    "build:sw": "node scripts/build-sw.js"
   },
   "author": "",
   "license": "MIT"
