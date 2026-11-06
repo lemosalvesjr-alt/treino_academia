@@ -1,48 +1,759 @@
-/* style.css */
-body {
-  font-family: Arial, sans-serif;
+/* ============================================================
+   TREINO ACADEMIA – Dark Fitness PWA Theme
+   Mobile-first design, inspired by Nike Training / Apple Fitness
+   ============================================================ */
+
+/* ---------- CSS Custom Properties ---------- */
+:root {
+  --bg-primary: #0a0a0a;
+  --bg-card: #1a1a1a;
+  --bg-card-hover: #222222;
+  --bg-input: #1e1e1e;
+  --bg-overlay: rgba(0, 0, 0, 0.85);
+
+  --accent: #00e676;
+  --accent-glow: rgba(0, 230, 118, 0.25);
+  --accent-dark: #00c853;
+  --amber: #ffa726;
+  --amber-glow: rgba(255, 167, 38, 0.25);
+  --cyan: #00e5ff;
+  --red: #ff5252;
+  --red-glow: rgba(255, 82, 82, 0.25);
+
+  --text-primary: #f5f5f5;
+  --text-secondary: #9e9e9e;
+  --text-muted: #616161;
+
+  --border: #2a2a2a;
+  --border-light: #333333;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px var(--accent-glow);
+
+  --transition: 0.2s ease;
+  --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI',
+    Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- App Shell ---------- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 16px 20px;
+  background: linear-gradient(180deg, var(--bg-primary) 60%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.app-header h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.app-header .subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.app-main {
+  padding: 0 20px 100px;
+}
+
+/* ---------- Screens (view switching) ---------- */
+.screen {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.screen.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Section Titles ---------- */
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* ---------- Chip Groups ---------- */
+.chip-group {
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
 }
-header, footer {
-  background: #2c3e50;
-  color: white;
-  padding: 1rem;
-  text-align: center;
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  user-select: none;
+  -webkit-user-select: none;
+  min-height: 44px;
+  min-width: 44px;
 }
-main {
+
+.chip:active {
+  transform: scale(0.95);
+}
+
+.chip.selected {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+  box-shadow: var(--shadow-glow);
+}
+
+.chip.selected .chip-icon {
+  filter: brightness(0);
+}
+
+.chip-icon {
+  font-size: 1.1rem;
+}
+
+/* Focus chips (wider) */
+.chip-group--focus .chip {
   flex: 1;
-  padding: 1rem;
-}
-form {
-  display: flex;
+  min-width: calc(50% - 4px);
+  padding: 14px 12px;
   flex-direction: column;
-  gap: 0.5rem;
-  max-width: 300px;
-  margin: auto;
+  gap: 4px;
+  border-radius: var(--radius-md);
 }
-label {
-  font-weight: bold;
+
+.chip-group--focus .chip-label {
+  font-size: 0.75rem;
 }
-button {
-  margin-top: 0.5rem;
-  padding: 0.5rem;
+
+/* Level chips */
+.chip-group--level .chip {
+  flex: 1;
 }
-#exercise-list {
-  list-style: none;
-  padding: 0;
-}
-#exercise-list li {
-  margin-bottom: 1rem;
+
+/* ---------- Primary CTA Button ---------- */
+.btn-primary {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 24px;
+  margin-top: 12px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--accent);
+  color: #000;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 56px;
+  box-shadow: var(--shadow-glow);
 }
-#exercise-list img {
-  max-width: 80px;
-  max-height: 80px;
-  object-fit: contain;
+
+.btn-primary:active {
+  transform: scale(0.97);
+  background: var(--accent-dark);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Secondary / outline buttons */
+.btn-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 24px;
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition);
+  min-height: 48px;
+}
+
+.btn-secondary:active {
+  background: var(--bg-card);
+  transform: scale(0.97);
+}
+
+.btn-danger {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.btn-danger:active {
+  background: rgba(255, 82, 82, 0.1);
+}
+
+/* ---------- Exercise Cards (Preview) ---------- */
+.exercise-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.exercise-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  transition: background var(--transition);
+  animation: slideUp 0.3s ease backwards;
+}
+
+.exercise-card:nth-child(1) { animation-delay: 0s; }
+.exercise-card:nth-child(2) { animation-delay: 0.05s; }
+.exercise-card:nth-child(3) { animation-delay: 0.1s; }
+.exercise-card:nth-child(4) { animation-delay: 0.15s; }
+.exercise-card:nth-child(5) { animation-delay: 0.2s; }
+.exercise-card:nth-child(6) { animation-delay: 0.25s; }
+.exercise-card:nth-child(7) { animation-delay: 0.3s; }
+.exercise-card:nth-child(8) { animation-delay: 0.35s; }
+
+.exercise-card-img {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--bg-input);
+  flex-shrink: 0;
+}
+
+.exercise-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.exercise-card-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.exercise-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.exercise-card-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.exercise-card-muscles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.muscle-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: rgba(0, 230, 118, 0.1);
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* ---------- Summary Bar ---------- */
+.summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.summary-stat {
+  text-align: center;
+}
+
+.summary-stat-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.summary-stat-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 2px;
+}
+
+/* ---------- Active Workout Screen ---------- */
+.workout-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 10px;
+}
+
+.workout-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.workout-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.workout-counter {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.workout-exercise-img {
+  width: min(260px, 70vw);
+  height: min(260px, 70vw);
+  border-radius: var(--radius-xl);
+  object-fit: cover;
+  background: var(--bg-card);
+  margin-bottom: 20px;
+  border: 2px solid var(--border);
+}
+
+.workout-exercise-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.workout-exercise-detail {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+/* Circular Timer */
+.timer-ring-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 20px;
+}
+
+.timer-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.timer-ring-bg {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 6;
+}
+
+.timer-ring-fill {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s linear;
+}
+
+.timer-ring-fill.rest {
+  stroke: var(--amber);
+}
+
+.timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-seconds {
+  font-size: 2.8rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-top: 4px;
+}
+
+.timer-label.rest-label {
+  color: var(--amber);
+}
+
+/* Workout Controls */
+.workout-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.workout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.workout-btn:active {
+  transform: scale(0.9);
+  background: var(--bg-card-hover);
+}
+
+.workout-btn--play {
+  width: 72px;
+  height: 72px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  font-size: 1.6rem;
+  box-shadow: var(--shadow-glow);
+}
+
+.workout-btn--play:active {
+  background: var(--accent-dark);
+}
+
+.workout-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ---------- Completion Screen ---------- */
+.completion-icon {
+  font-size: 4rem;
+  margin-bottom: 12px;
+}
+
+.completion-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.completion-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+}
+
+.completion-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.completion-stat-card {
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  text-align: center;
+}
+
+.completion-stat-card .value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.completion-stat-card .label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ---------- History Screen ---------- */
+.history-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-muted);
+}
+
+.history-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+
+.history-item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 230, 118, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.history-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.history-item-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ---------- Bottom Nav ---------- */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: calc(60px + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+}
+
+.bottom-nav.hidden {
+  display: none;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--transition);
+  min-width: 64px;
+  min-height: 44px;
+}
+
+.nav-item-icon {
+  font-size: 1.3rem;
+}
+
+.nav-item.active {
+  color: var(--accent);
+}
+
+/* ---------- Footer Attribution ---------- */
+.app-footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.app-footer a {
+  color: var(--text-secondary);
+  text-decoration: underline;
+}
+
+/* ---------- Loading Spinner ---------- */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Responsive fine-tuning ---------- */
+@media (min-width: 480px) {
+  .app-main {
+    max-width: 440px;
+    margin: 0 auto;
+  }
+
+  .chip-group--focus .chip {
+    min-width: calc(25% - 6px);
+    flex: unset;
+  }
+}
+
+/* ---------- Scrollbar (WebKit) ---------- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 2px;
 }

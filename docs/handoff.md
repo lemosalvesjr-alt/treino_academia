@@ -7,20 +7,16 @@ Documento de transição e continuidade entre sessões de desenvolvimento.
 ## 1. Contexto & Decisões Estratégicas Recentes
 
 ### A. Abandono do modelo "PC como Servidor"
-* A abordagem anterior de rodar um servidor local no PC (`serve .`) e acessar via IP local no iPhone foi definitivamente descartada:
+* A abordagem de rodar um servidor local no PC (`serve .`) e acessar via IP local no iPhone foi descartada:
   1. Exigia o PC ligado 24/7.
   2. Falhava em redes Wi-Fi devido a firewall, sleep mode e IP dinâmico.
   3. Não fornecia HTTPS (requisito estrito do iOS Safari para instalação de PWAs e funcionamento estável de Service Workers).
-* **Nova Diretriz**: O aplicativo é **100% Client-Side** (estático). Hospedagem na nuvem gratuita (Vercel, GitHub Pages ou Netlify) com CDN global, HTTPS nativo e suporte offline via Service Worker.
+* **Diretriz**: O aplicativo é **100% Client-Side** (estático). Hospedagem na nuvem gratuita (GitHub Pages / Vercel) com CDN global, HTTPS nativo e suporte offline via Service Worker.
 
 ### B. Versionamento e Repositório GitHub
-* Repositório criado e sincronizado: [lemosalvesjr-alt/treino_academia](https://github.com/lemosalvesjr-alt/treino_academia)
-* Visibilidade: Privado. Branch padrão: `main`.
-
-### C. Criação do `AGENTS.md` e Reorganização do Repositório
-* `AGENTS.md` criado na raiz do repositório contendo todas as regras, padrões de código e convenções do projeto.
-* Remoção de mais de 1.800 arquivos HTML legados do site antigo da RepDB que estavam inflando o repositório.
-* Arquivos organizados em pastas dedicadas (`css/`, `js/`, `data/`, `assets/`, `tests/`, `docs/`).
+* Repositório: [lemosalvesjr-alt/treino_academia](https://github.com/lemosalvesjr-alt/treino_academia)
+* Branch de trabalho atual: `refactor/workout-load`
+* Branch padrão de produção: `main`
 
 ---
 
@@ -29,29 +25,30 @@ Documento de transição e continuidade entre sessões de desenvolvimento.
 ```text
 treino_academia/
 ├── AGENTS.md                  # Regras de arquitetura e diretrizes para agentes
-├── index.html                 # Ponto de entrada PWA
-├── manifest.json              # Manifesto PWA (metadados, tema e ícones)
-├── service-worker.js          # Cache e execução offline (na raiz para escopo global /)
+├── index.html                 # Ponto de entrada PWA (Dark theme esportivo + views reativas)
+├── manifest.json              # Manifesto PWA com tema escuro e ícones
+├── service-worker.js          # Cache offline v3 com suporte sob demanda para imagens
 ├── package.json               # Dependências, scripts (npm test) e metadados
 ├── .gitignore
 │
 ├── css/
-│   └── style.css              # Estilos do app
+│   └── style.css              # Design System mobile-first, dark mode alta energia, safe-areas iOS
 │
 ├── js/
-│   ├── app.js                 # Inicialização da interface e eventos
-│   └── workout.js             # Algoritmo de geração de treinos
+│   ├── app.js                 # Inicialização da interface, views, player de treino e histórico
+│   ├── workout.js             # Algoritmo puro de geração de treinos (sem dependências de Node)
+│   └── timer.js               # Controlador de countdown timer (exercício / descanso / pausa)
 │
 ├── data/
 │   └── exercises.json         # Base de exercícios RepDB (2.6 MB, formato JSON)
 │
 ├── assets/
 │   ├── icons/                 # Ícones PWA (180px, 32px, SVG)
-│   ├── illustrations/         # SVGs (pushup, squat, lunges)
+│   ├── illustrations/         # SVGs locais de fallback
 │   └── images/                # Imagens de exercícios (flat, equipment, muscles)
 │
 ├── tests/
-│   └── workout.test.js        # Testes automatizados (npm test)
+│   └── workout.test.js        # Testes automatizados (37 testes passando via npm test)
 │
 └── docs/
     ├── handoff.md             # Este documento
@@ -62,34 +59,44 @@ treino_academia/
 
 ---
 
-## 3. Estado Atual e Próximos Passos (Foco da Próxima Sessão)
+## 3. Estado Atual e Conquistas Recentes
 
-### Passo 1: Correção Arquitetural do `workout.js` (Crítico)
-* **Problema atual**: `js/workout.js` ainda importa `fs` e `path` do Node.js. Isso funciona no `npm test`, mas gera erro no navegador (`Failed to resolve module specifier "fs"`).
-* **Solução**: Refatorar `workout.js` e `app.js` para carregar `data/exercises.json` de forma puramente client-side via `fetch('./data/exercises.json')`, mantendo compatibilidade com Node.js para os testes em `tests/workout.test.js` (ou injetando os dados).
+### ✅ Passo 1: Correção Arquitetural do `workout.js` (Concluído)
+- **Zero módulos Node.js no frontend**: Removidos imports de `fs` e `path`. O módulo `workout.js` é agora uma função pura que recebe os dados injetados via `generateWorkout(allExercises, durationMinutes, level, focus)`.
+- **Compatibilidade total com Browser e Node.js**: O `app.js` carrega `exercises.json` via `fetch('./data/exercises.json')`, enquanto `tests/workout.test.js` carrega via `fs.readFileSync`.
+- **Filtro de Foco Muscular**: Suporte completo para `corpo-inteiro`, `superiores`, `core` e `inferiores` (incluindo exercícios de `full_body` em todos os focos).
+- **Tratamento de Campos**: Resolução dinâmica de imagens (`main` → `start` → `peak` → fallback SVG), contagem de repetições baseada no MET e tempo de descanso escalonado por nível (15s iniciante, 12s intermediário, 10s avançado).
+- **Testes Unitários**: 37 testes automatizados cobrindo todos os cenários válidos, filtragem, campos de retorno, rest intervals, tratamentos de erro e resoluções de imagem.
 
-### Passo 2: Redesign Completo da Interface (UI/UX Premium)
-* A interface atual é básica e crua. Criar uma interface moderna no padrão de aplicativos fitness (Nike Training, Apple Fitness, Freeletics):
-  1. **Visual**: Dark mode esportivo de alta energia (fundos escuros, acentos em verde neon/âmbar, tipografia esportiva e cantos arredondados).
-  2. **Controles Rápidos**: Chips de duração rápida (10m, 20m, 30m, 45m) e seletor de foco muscular (Corpo Inteiro, Superiores, Core, Inferiores).
-  3. **Cards de Exercícios**: Demonstração visual do exercício (`assets/images/flat/...`), músculos ativados, repetições e tempo sugeridos.
-  4. **Modo "Treino Ativo" (Player Interativo)**:
-     * Botão "Iniciar Treino".
-     * Cronômetro de execução na tela para cada exercício.
-     * Timer de descanso entre exercícios (com alertas visuais/sonoros).
-     * Navegação "Próximo Exercício" e "Concluir Treino".
-  5. **Histórico Local**: Salvar treinos concluídos no `localStorage` do dispositivo.
-
-### Passo 3: Publicação em Nuvem Gratuita
-* Configurar o deploy gratuito (Vercel ou GitHub Pages) a partir do repositório [lemosalvesjr-alt/treino_academia](https://github.com/lemosalvesjr-alt/treino_academia).
-* Gerar a URL pública HTTPS para instalação no iPhone como PWA (Adicionar à Tela de Início).
+### ✅ Passo 2: Redesign Completo da Interface UI/UX (Concluído)
+- **Dark Mode Esportivo**: Fundo `#0a0a0a` / `#1a1a1a` com contrastes em verde neon (`#00e676`), âmbar (`#ffa726`) e ciano (`#00e5ff`).
+- **Controles Rápidos por Chips**: Duração (10m, 20m, 30m, 45m), Nível (Iniciante, Intermediário, Avançado) e Foco Muscular (Corpo Inteiro, Superiores, Core, Inferiores) com feedback tátil e área de toque > 44px.
+- **Card de Exercícios Preview**: Exibição da imagem webp do exercício, badges de músculos ativados, reps e tempo estimado.
+- **Modo Treino Ativo (Player Interativo)**:
+  - Barra de progresso do treino.
+  - Timer circular com animação SVG (verde para exercício, âmbar para descanso).
+  - Alterne automático: término do exercício inicia descanso; término do descanso avança para o próximo.
+  - Controles de Play/Pause, Anterior, Próximo e Encerrar Treino.
+- **Tela de Conclusão**: Resumo de tempo total, exercícios realizados, foco e nível com animação de celebração.
+- **Histórico Local Persistente**: Armazenamento dos treinos concluídos em `localStorage` com listagem e opção de limpeza.
+- **Barra de Navegação Inferior**: Acesso rápido entre Treino e Histórico, adaptada para Safe Area do iPhone.
 
 ---
 
-## 4. Comandos de Verificação Rápida
+## 4. Próximos Passos (Passo 3: Deploy & Publicação)
+
+1. **Commit e Push das alterações**:
+   - Commitar os arquivos modificados e o novo `js/timer.js` no branch `refactor/workout-load`.
+   - Realizar merge ou push para a branch `main`.
+2. **Publicação no GitHub Pages**:
+   - Configurar o GitHub Pages para servir a raiz (`/`) da branch `main`.
+3. **Instalação no iPhone**:
+   - Acessar a URL HTTPS gerada no Safari do iPhone.
+   - Tocar em "Compartilhar" -> "Adicionar à Tela de Início".
+   - Testar o funcionamento offline (modo avião).
+
+---
+
+## 5. Comandos de Verificação Rápida
 * **Executar testes unitários**: `npm test`
 * **Status do Git**: `git status`
-* **Sincronizar com GitHub**: `git push origin main`
-
----
-*Atualizado em: 2026-11-05 (Sessão de Organização e Criação do Repositório)*

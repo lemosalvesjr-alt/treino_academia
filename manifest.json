@@ -1,20 +1,24 @@
 {
-  "name": "Treino PWA",
+  "name": "Treino Academia",
   "short_name": "Treino",
+  "description": "Gerador de treinos com peso corporal. Treine em qualquer lugar, sem equipamento.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#2c3e50",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
   "icons": [
     {
       "src": "assets/icons/repdb-icon-180.png",
       "sizes": "180x180",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "assets/icons/repdb-dataset-icon.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }
-  ]
+  ],
+  "categories": ["fitness", "health"]
 }

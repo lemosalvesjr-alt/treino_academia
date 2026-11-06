@@ -2,46 +2,237 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Treino PWA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Treino Academia</title>
+
+  <!-- PWA & iOS -->
   <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Treino" />
+  <link rel="apple-touch-icon" href="assets/icons/repdb-icon-180.png" />
+
+  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css" />
-  <script type="module" defer src="js/app.js"></script>
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .catch(err => console.error('ServiceWorker registration failed:', err));
-  });
-}
-</script>
+
+  <!-- Service Worker registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .catch(err => console.error('SW registration failed:', err));
+      });
+    }
+  </script>
 </head>
 <body>
-  <header>
-    <h1>Gerador de Treinos</h1>
+
+  <!-- ========== HEADER ========== -->
+  <header class="app-header">
+    <h1>Treino Academia</h1>
+    <p class="subtitle">Peso corporal • Sem equipamento</p>
   </header>
-  <main>
-    <form id="workout-form">
-      <label for="duration">Duração (minutos, 5‑60):</label>
-      <input type="number" id="duration" name="duration" min="5" max="60" required />
 
-      <label for="level">Nível:</label>
-      <select id="level" name="level" required>
-        <option value="iniciante">Iniciante</option>
-        <option value="intermediario">Intermediário</option>
-        <option value="avancado">Avançado</option>
-      </select>
+  <!-- ========== MAIN ========== -->
+  <main class="app-main">
 
-      <button type="submit">Gerar treino</button>
-    </form>
-    <section id="result" hidden>
-      <h2>Seu treino</h2>
-      <ul id="exercise-list"></ul>
-      <p id="total-time"></p>
-    </section>
+    <!-- Loading -->
+    <div id="loading-screen" class="screen active">
+      <div class="loading-screen">
+        <div class="spinner"></div>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Carregando exercícios…</p>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: Setup -->
+    <div id="setup-screen" class="screen">
+
+      <!-- Duration chips -->
+      <p class="section-title">⏱ Duração</p>
+      <div class="chip-group chip-group--duration" id="duration-chips">
+        <button type="button" class="chip" data-value="10">10 min</button>
+        <button type="button" class="chip selected" data-value="20">20 min</button>
+        <button type="button" class="chip" data-value="30">30 min</button>
+        <button type="button" class="chip" data-value="45">45 min</button>
+      </div>
+
+      <!-- Level chips -->
+      <p class="section-title">📊 Nível</p>
+      <div class="chip-group chip-group--level" id="level-chips">
+        <button type="button" class="chip selected" data-value="iniciante">🟢 Iniciante</button>
+        <button type="button" class="chip" data-value="intermediario">🟡 Intermediário</button>
+        <button type="button" class="chip" data-value="avancado">🔴 Avançado</button>
+      </div>
+
+      <!-- Focus chips -->
+      <p class="section-title">🎯 Foco Muscular</p>
+      <div class="chip-group chip-group--focus" id="focus-chips">
+        <button type="button" class="chip selected" data-value="corpo-inteiro">
+          <span class="chip-icon">💪</span>
+          <span class="chip-label">Corpo Inteiro</span>
+        </button>
+        <button type="button" class="chip" data-value="superiores">
+          <span class="chip-icon">🏋️</span>
+          <span class="chip-label">Superiores</span>
+        </button>
+        <button type="button" class="chip" data-value="core">
+          <span class="chip-icon">🧘</span>
+          <span class="chip-label">Core</span>
+        </button>
+        <button type="button" class="chip" data-value="inferiores">
+          <span class="chip-icon">🦵</span>
+          <span class="chip-label">Inferiores</span>
+        </button>
+      </div>
+
+      <!-- CTA -->
+      <button type="button" id="btn-generate" class="btn-primary">
+        ⚡ Gerar Treino
+      </button>
+    </div>
+
+    <!-- SCREEN 2: Preview -->
+    <div id="preview-screen" class="screen">
+
+      <!-- Summary bar -->
+      <div class="summary-bar" id="preview-summary">
+        <div class="summary-stat">
+          <div class="summary-stat-value" id="preview-count">-</div>
+          <div class="summary-stat-label">Exercícios</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" id="preview-time">-</div>
+          <div class="summary-stat-label">Minutos</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" id="preview-focus">-</div>
+          <div class="summary-stat-label">Foco</div>
+        </div>
+      </div>
+
+      <!-- Exercise list -->
+      <ul class="exercise-list" id="exercise-list"></ul>
+
+      <!-- Action buttons -->
+      <button type="button" id="btn-start-workout" class="btn-primary">
+        ▶ Iniciar Treino
+      </button>
+      <button type="button" id="btn-back-setup" class="btn-secondary" style="margin-top:10px;">
+        ← Voltar
+      </button>
+    </div>
+
+    <!-- SCREEN 3: Active Workout -->
+    <div id="workout-screen" class="screen">
+      <div class="workout-player">
+
+        <!-- Progress bar -->
+        <div class="workout-progress-bar">
+          <div class="workout-progress-fill" id="workout-progress"></div>
+        </div>
+
+        <!-- Counter -->
+        <p class="workout-counter" id="workout-counter">Exercício 1 de 8</p>
+
+        <!-- Exercise image -->
+        <img class="workout-exercise-img" id="workout-img" src="" alt="" />
+
+        <!-- Exercise name & detail -->
+        <h2 class="workout-exercise-name" id="workout-name"></h2>
+        <p class="workout-exercise-detail" id="workout-detail"></p>
+
+        <!-- Circular Timer -->
+        <div class="timer-ring-container">
+          <svg class="timer-ring" viewBox="0 0 120 120">
+            <circle class="timer-ring-bg" cx="60" cy="60" r="54" />
+            <circle class="timer-ring-fill" id="timer-ring-fill" cx="60" cy="60" r="54"
+              stroke-dasharray="339.292" stroke-dashoffset="0" />
+          </svg>
+          <div class="timer-text">
+            <span class="timer-seconds" id="timer-seconds">30</span>
+            <span class="timer-label" id="timer-label">EXERCÍCIO</span>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="workout-controls">
+          <button type="button" class="workout-btn" id="btn-prev" aria-label="Anterior">⏮</button>
+          <button type="button" class="workout-btn workout-btn--play" id="btn-play-pause" aria-label="Play/Pause">▶</button>
+          <button type="button" class="workout-btn" id="btn-next" aria-label="Próximo">⏭</button>
+        </div>
+
+        <!-- Stop workout -->
+        <button type="button" id="btn-stop-workout" class="btn-secondary btn-danger" style="margin-top:24px;">
+          ✕ Encerrar Treino
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: Completion -->
+    <div id="completion-screen" class="screen">
+      <div style="text-align:center; padding-top:20px;">
+        <div class="completion-icon">🏆</div>
+        <h2 class="completion-title">Treino Concluído!</h2>
+        <p class="completion-subtitle">Excelente trabalho! Continue assim.</p>
+
+        <div class="completion-stats" id="completion-stats">
+          <div class="completion-stat-card">
+            <div class="value" id="comp-exercises">-</div>
+            <div class="label">Exercícios</div>
+          </div>
+          <div class="completion-stat-card">
+            <div class="value" id="comp-time">-</div>
+            <div class="label">Tempo Total</div>
+          </div>
+          <div class="completion-stat-card">
+            <div class="value" id="comp-focus">-</div>
+            <div class="label">Foco</div>
+          </div>
+          <div class="completion-stat-card">
+            <div class="value" id="comp-level">-</div>
+            <div class="label">Nível</div>
+          </div>
+        </div>
+
+        <button type="button" id="btn-new-workout" class="btn-primary">
+          ⚡ Novo Treino
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: History -->
+    <div id="history-screen" class="screen">
+      <p class="section-title" style="margin-bottom:16px;">📋 Histórico de Treinos</p>
+      <div id="history-content">
+        <div class="history-empty">
+          <div class="history-empty-icon">📭</div>
+          <p>Nenhum treino registrado ainda.</p>
+          <p style="margin-top:4px; font-size: 0.75rem;">Complete um treino para vê-lo aqui.</p>
+        </div>
+      </div>
+      <button type="button" id="btn-clear-history" class="btn-secondary btn-danger" style="margin-top:20px; display:none;">
+        🗑 Limpar Histórico
+      </button>
+    </div>
+
   </main>
-  <footer>
-    <p>Exercise data by <a href="https://repdb.co" target="_blank" rel="noopener">RepDB (repdb.co)</a></p>
-  </footer>
+
+  <!-- ========== BOTTOM NAV ========== -->
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" data-screen="setup-screen">
+      <span class="nav-item-icon">🏠</span>
+      Início
+    </button>
+    <button class="nav-item" data-screen="history-screen">
+      <span class="nav-item-icon">📋</span>
+      Histórico
+    </button>
+  </nav>
+
+  <!-- ========== FOOTER (inside main, hidden during workout) ========== -->
+
+  <!-- App script -->
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
