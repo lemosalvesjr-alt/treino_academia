@@ -14,7 +14,7 @@ Documento de transição e continuidade entre sessões de desenvolvimento.
 ### B. Versionamento e Repositório GitHub
 * Repositório: [lemosalvesjr-alt/treino_academia](https://github.com/lemosalvesjr-alt/treino_academia)
 * Branch padrão: `main`
-* **Release Oficial**: [v1.0.0](https://github.com/lemosalvesjr-alt/treino_academia/releases/tag/v1.0.0)
+* **Release Oficial**: [v1.0.1](https://github.com/lemosalvesjr-alt/treino_academia/releases/tag/v1.0.1) (anterior: v1.0.0)
 
 ---
 
