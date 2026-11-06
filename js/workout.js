@@ -2,18 +2,25 @@
 // Generates a workout using the RepDB free dataset (bodyweight exercises).
 // Falls back to placeholder SVG images if no image is provided.
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+// Conditional loading of the exercises data – works both in Node (for tests) and in the browser.
+let allExercises = [];
 
-// Resolve __dirname in ES module
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Load RepDB free tier exercises
-const repdbPath = path.resolve(__dirname, '..', 'data', 'exercises.json');
-const repdbData = JSON.parse(fs.readFileSync(repdbPath, 'utf8'));
-const allExercises = repdbData.exercises;
+if (typeof window !== 'undefined' && typeof fetch === 'function') {
+  // Browser environment
+  const resp = await fetch('./data/exercises.json');
+  const data = await resp.json();
+  allExercises = data.exercises;
+} else {
+  // Node environment (tests)
+  const { readFileSync } = await import('fs');
+  const { resolve, dirname } = await import('path');
+  const { fileURLToPath } = await import('url');
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const repdbPath = resolve(__dirname, '..', 'data', 'exercises.json');
+  const repdbData = JSON.parse(readFileSync(repdbPath, 'utf8'));
+  allExercises = repdbData.exercises;
+}
 
 /**
  * Map Portuguese level to RepDB difficulty string.
