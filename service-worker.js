@@ -1,17 +1,16 @@
 // service-worker.js
-const CACHE_NAME = 'treino-pwa-v1';
+const CACHE_NAME = 'treino-pwa-v2';
 const FILES_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json',
-  '/pushup.svg',
-  '/squat.svg',
-  '/lunges.svg',
-  // Include the RepDB static assets (images, css, etc.)
-  // Using a wildcard pattern is not supported in the array, so we list the folder.
-  '/repdb/',
+  './',
+  './index.html',
+  './manifest.json',
+  './css/style.css',
+  './js/app.js',
+  './js/workout.js',
+  './data/exercises.json',
+  './assets/illustrations/pushup.svg',
+  './assets/illustrations/squat.svg',
+  './assets/illustrations/lunges.svg',
 ];
 
 self.addEventListener('install', (event) => {
