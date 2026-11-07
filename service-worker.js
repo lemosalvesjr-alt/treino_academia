@@ -1,6 +1,6 @@
 // service-worker.js
-// Cache offline v4 - Pre-carrega todas as 216 ilustrações dos exercícios de peso corporal
-const CACHE_NAME = 'treino-academia-v4';
+// Cache offline v5 - Séries realistas e pre-cache de todas as ilustrações
+const CACHE_NAME = 'treino-academia-v5';
 
 const STATIC_ASSETS = [
   './',

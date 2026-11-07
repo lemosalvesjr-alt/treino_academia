@@ -58,15 +58,17 @@ treino_academia/
 
 ---
 
-## 3. Marcos Alcançados (v1.0.0)
+## 3. Marcos Alcançados (v1.0.1 / Atual)
 
-1. **Release Oficial `v1.0.0`**: Tag anotada e Release criada no GitHub com changelog completo.
-2. **Arquitetura 100% Browser-Safe**: Módulo `workout.js` sem chamadas de Node (`fs`/`path`), testado via Node com dados injetados e consumido via `fetch()` no navegador.
-3. **Filtros Completos de Treino**: Duração (10, 20, 30, 45 min), Nível (Iniciante, Intermediário, Avançado) e Foco Muscular (Corpo Inteiro, Superiores, Core, Inferiores).
-4. **Player de Treino Interativo**: Cronômetro circular animado, alternância automática de séries e descansos proporcionais ao nível.
-5. **Histórico Local Persistente**: Treinos concluídos salvos no `localStorage`.
-6. **Suíte de Testes Unitários**: 37 testes automatizados cobrindo geração, limites e validações.
-7. **Atribuição Legal RepDB**: Licença livre e atribuição presente no README e no rodapé do aplicativo.
+1. **Correção Biomecânica da Composição de Séries**:
+   * Fim do sorteio aleatório infinito de dezenas de exercícios para uma única série.
+   * Introdução de **Séries Estruturadas (2 a 4 séries por exercício)** com repetição motora progressiva.
+   * Seleção realista de **4 a 8 exercícios principais**, com alternância equilibrada de grupos musculares.
+   * **Descansos Realistas e Seguros**: Iniciante (45s), Intermediário (30s), Avançado (20s).
+   * O Player Ativo agora gerencia a execução série a série (`Exercício 1 de 6 • Série 1/3`).
+2. **Release Oficial `v1.0.1`**: Tag anotada e Release criada no GitHub.
+3. **Service Worker v5**: Cache atualizado com pré-cache de todas as ilustrações e scripts sincronizados.
+4. **Suíte de Testes Unitários**: 40 testes automatizados cobrindo geração, composição de séries, limites e validações.
 
 ---
 

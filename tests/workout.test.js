@@ -108,7 +108,7 @@ function testExerciseFields() {
 
   test('each exercise has all required fields', () => {
     const result = generateWorkout(allExercises, 30, 'iniciante');
-    const requiredFields = ['id', 'name', 'description', 'image', 'primaryMuscles', 'bodyPart', 'reps', 'timeSec', 'restSec'];
+    const requiredFields = ['id', 'name', 'description', 'image', 'primaryMuscles', 'bodyPart', 'sets', 'reps', 'timeSec', 'restSec'];
     for (const ex of result.exercises) {
       for (const field of requiredFields) {
         assert(ex[field] !== undefined, `missing field "${field}" on exercise "${ex.id}"`);
@@ -117,30 +117,66 @@ function testExerciseFields() {
       assert(typeof ex.name === 'string' && ex.name.length > 0, 'name should be non-empty string');
       assert(typeof ex.image === 'string' && ex.image.startsWith('assets/'), `image "${ex.image}" should start with "assets/"`);
       assert(Array.isArray(ex.primaryMuscles), 'primaryMuscles should be array');
+      assert(typeof ex.sets === 'number' && ex.sets >= 2 && ex.sets <= 5, `sets should be between 2 and 5, got ${ex.sets}`);
       assert(typeof ex.reps === 'number' && ex.reps >= 8, `reps should be >= 8, got ${ex.reps}`);
       assert(typeof ex.timeSec === 'number' && ex.timeSec > 0, 'timeSec should be positive number');
       assert(typeof ex.restSec === 'number' && ex.restSec > 0, 'restSec should be positive number');
     }
   });
 
-  test('beginner exercises have 15s rest', () => {
+  test('beginner exercises have 45s rest', () => {
     const result = generateWorkout(allExercises, 30, 'iniciante');
     for (const ex of result.exercises) {
-      assert(ex.restSec === 15, `beginner restSec should be 15, got ${ex.restSec}`);
+      assert(ex.restSec === 45, `beginner restSec should be 45, got ${ex.restSec}`);
     }
   });
 
-  test('intermediate exercises have 12s rest', () => {
+  test('intermediate exercises have 30s rest', () => {
     const result = generateWorkout(allExercises, 30, 'intermediario');
     for (const ex of result.exercises) {
-      assert(ex.restSec === 12, `intermediate restSec should be 12, got ${ex.restSec}`);
+      assert(ex.restSec === 30, `intermediate restSec should be 30, got ${ex.restSec}`);
     }
   });
 
-  test('advanced exercises have 10s rest', () => {
+  test('advanced exercises have 20s rest', () => {
     const result = generateWorkout(allExercises, 30, 'avancado');
     for (const ex of result.exercises) {
-      assert(ex.restSec === 10, `advanced restSec should be 10, got ${ex.restSec}`);
+      assert(ex.restSec === 20, `advanced restSec should be 20, got ${ex.restSec}`);
+    }
+  });
+}
+
+function testSetComposition() {
+  console.log('\n🧠 Realistic set & exercise composition');
+
+  test('45min beginner full-body has realistic exercise count (not 40+)', () => {
+    const result = generateWorkout(allExercises, 45, 'iniciante', 'corpo-inteiro');
+    // Humanly realistic: 5 to 8 exercises
+    assert(
+      result.exercises.length >= 4 && result.exercises.length <= 10,
+      `expected 4-10 exercises for 45min, got ${result.exercises.length}`
+    );
+    assert(result.totalSets >= 12, `expected at least 12 total sets, got ${result.totalSets}`);
+    assert(Array.isArray(result.steps), 'steps should be an array');
+    assert(result.steps.length === result.totalSets, `steps length (${result.steps.length}) must match totalSets (${result.totalSets})`);
+  });
+
+  test('30min intermediate has realistic exercise count (4 to 8)', () => {
+    const result = generateWorkout(allExercises, 30, 'intermediario', 'corpo-inteiro');
+    assert(
+      result.exercises.length >= 4 && result.exercises.length <= 8,
+      `expected 4-8 exercises for 30min, got ${result.exercises.length}`
+    );
+  });
+
+  test('steps sequence correctly maps exercise sets', () => {
+    const result = generateWorkout(allExercises, 20, 'iniciante', 'superiores');
+    for (let i = 0; i < result.steps.length; i++) {
+      const step = result.steps[i];
+      assert(typeof step.exerciseIndex === 'number', 'step must have exerciseIndex');
+      assert(typeof step.setIndex === 'number' && step.setIndex >= 1, 'step must have setIndex >= 1');
+      assert(step.setIndex <= step.totalSets, 'step setIndex must not exceed totalSets');
+      assert(step.exercise !== undefined, 'step must have exercise object');
     }
   });
 }
@@ -240,6 +276,7 @@ testDataLoaded();
 testValidScenarios();
 testFocusFiltering();
 testExerciseFields();
+testSetComposition();
 testInvalidInputs();
 testImageResolution();
 

@@ -7,8 +7,8 @@ import { createTimer } from './timer.js';
 
 // ── State ──────────────────────────────────────────────
 let allExercises = [];
-let currentWorkout = null;  // { exercises, totalTimeSec, focusLabel, levelLabel }
-let currentIndex = 0;
+let currentWorkout = null; // { exercises, steps, totalTimeSec, totalSets, focusLabel, levelLabel }
+let currentStepIndex = 0;
 let isResting = false;
 let timer = null;
 
@@ -45,7 +45,7 @@ const exerciseList = $('exercise-list');
 const btnStartWorkout = $('btn-start-workout');
 const btnBackSetup = $('btn-back-setup');
 
-// Workout screen
+// Active workout screen
 const workoutProgress = $('workout-progress');
 const workoutCounter = $('workout-counter');
 const workoutImg = $('workout-img');
@@ -101,11 +101,40 @@ function initChipGroup(container, onChange) {
 
     container.querySelectorAll('.chip').forEach((c) => c.classList.remove('selected'));
     chip.classList.add('selected');
-    onChange(chip.dataset.value);
+
+    const value = chip.dataset.value;
+    onChange(isNaN(Number(value)) ? value : Number(value));
   });
 }
 
-// ── Focus label mapping ────────────────────────────────
+// ── Format Helpers ─────────────────────────────────────
+const muscleLabels = {
+  chest: 'Peitoral',
+  back: 'Costas',
+  shoulders: 'Ombros',
+  upper_arms: 'Braços',
+  lower_arms: 'Antebraços',
+  upper_legs: 'Pernas',
+  lower_legs: 'Panturrilhas',
+  core: 'Core / Abdômen',
+  full_body: 'Corpo Inteiro',
+  quadriceps: 'Quadríceps',
+  hamstrings: 'Posterior de Coxa',
+  calves: 'Panturrilha',
+  glutes: 'Glúteos',
+  abs: 'Abdômen',
+  obliques: 'Oblíquos',
+  biceps: 'Bíceps',
+  triceps: 'Tríceps',
+  delts: 'Deltoides',
+  lats: 'Dorsal',
+  traps: 'Trapézio',
+};
+
+function formatMuscle(name) {
+  return muscleLabels[name] || name || 'Geral';
+}
+
 const focusLabels = {
   'corpo-inteiro': 'Corpo Inteiro',
   'superiores': 'Superiores',
@@ -114,36 +143,31 @@ const focusLabels = {
 };
 
 const levelLabels = {
-  'iniciante': 'Iniciante',
-  'intermediario': 'Intermediário',
-  'avancado': 'Avançado',
+  iniciante: 'Iniciante',
+  intermediario: 'Intermediário',
+  avancado: 'Avançado',
 };
 
-// ── Muscle name beautifier ─────────────────────────────
-function formatMuscle(muscle) {
-  return muscle.replace(/_/g, ' ');
-}
-
-// ── Initialize ─────────────────────────────────────────
+// ── Initialization ─────────────────────────────────────
 async function init() {
+  // Setup chip listeners
+  initChipGroup(durationChips, (val) => { selectedDuration = val; });
+  initChipGroup(levelChips, (val) => { selectedLevel = val; });
+  initChipGroup(focusChips, (val) => { selectedFocus = val; });
+
+  // Load exercise data
   try {
-    const resp = await fetch('./data/exercises.json');
-    if (!resp.ok) throw new Error('Failed to load exercises');
-    const data = await resp.json();
-    allExercises = data.exercises;
+    const res = await fetch('data/exercises.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    allExercises = data.exercises || [];
   } catch (err) {
-    console.error('Error loading exercises:', err);
-    screens.loading.querySelector('.loading-screen').innerHTML =
-      '<p style="color:var(--red);font-size:0.9rem;">Erro ao carregar exercícios.<br>Verifique sua conexão.</p>';
+    console.error('Failed to load exercises:', err);
+    alert('Erro ao carregar banco de exercícios. Verifique sua conexão.');
     return;
   }
 
-  // Wire up chip groups
-  initChipGroup(durationChips, (v) => { selectedDuration = parseInt(v, 10); });
-  initChipGroup(levelChips, (v) => { selectedLevel = v; });
-  initChipGroup(focusChips, (v) => { selectedFocus = v; });
-
-  // Buttons
+  // Bind buttons
   btnGenerate.addEventListener('click', handleGenerate);
   btnStartWorkout.addEventListener('click', handleStartWorkout);
   btnBackSetup.addEventListener('click', () => showScreen('setup'));
@@ -201,8 +225,9 @@ function handleGenerate() {
       <div class="exercise-card-info">
         <div class="exercise-card-name">${ex.name}</div>
         <div class="exercise-card-meta">
-          <span>⏱ ${ex.timeSec}s</span>
+          <span>🔁 ${ex.sets} séries</span>
           <span>🔄 ${ex.reps} reps</span>
+          <span>⏱ ${ex.timeSec}s</span>
           <span>😮‍💨 ${ex.restSec}s desc.</span>
         </div>
         <div class="exercise-card-muscles">
@@ -218,28 +243,36 @@ function handleGenerate() {
 
 // ── Start Active Workout ───────────────────────────────
 function handleStartWorkout() {
-  currentIndex = 0;
+  currentStepIndex = 0;
   isResting = false;
   showScreen('workout');
-  loadExercise(currentIndex);
+  loadStep(currentStepIndex);
 }
 
-function loadExercise(index) {
+function loadStep(index) {
   if (timer) timer.destroy();
 
-  const ex = currentWorkout.exercises[index];
-  const total = currentWorkout.exercises.length;
+  const steps = currentWorkout.steps || [];
+  const step = steps[index];
+  if (!step) {
+    handleWorkoutComplete();
+    return;
+  }
 
-  // Update progress
-  workoutProgress.style.width = `${((index) / total) * 100}%`;
-  workoutCounter.textContent = `Exercício ${index + 1} de ${total}`;
+  const ex = step.exercise;
+  const totalSteps = steps.length;
+  const totalExercises = currentWorkout.exercises.length;
+
+  // Update progress bar
+  workoutProgress.style.width = `${((index) / totalSteps) * 100}%`;
+  workoutCounter.textContent = `Exercício ${step.exerciseIndex + 1} de ${totalExercises} • Série ${step.setIndex} de ${step.totalSets}`;
 
   // Update exercise info
   workoutImg.src = ex.image;
   workoutImg.alt = ex.name;
   workoutImg.onerror = function () { this.src = 'assets/illustrations/pushup.svg'; };
   workoutName.textContent = ex.name;
-  workoutDetail.textContent = `${ex.reps} repetições • ${formatMuscle(ex.primaryMuscles[0] || ex.bodyPart)}`;
+  workoutDetail.textContent = `Série ${step.setIndex}/${step.totalSets} • ${ex.reps} repetições • ${formatMuscle(ex.primaryMuscles[0] || ex.bodyPart)}`;
 
   // Setup timer for exercise phase
   isResting = false;
@@ -247,7 +280,7 @@ function loadExercise(index) {
   timerLabel.classList.remove('rest-label');
   timerRingFill.classList.remove('rest');
 
-  timer = createTimer(ex.timeSec, onTimerTick, onExerciseComplete);
+  timer = createTimer(step.timeSec, onTimerTick, onExerciseComplete);
 
   // Update buttons
   btnPrev.disabled = index === 0;
@@ -265,7 +298,9 @@ function onTimerTick(remaining, total) {
 }
 
 function onExerciseComplete() {
-  const ex = currentWorkout.exercises[currentIndex];
+  const steps = currentWorkout.steps || [];
+  const step = steps[currentStepIndex];
+  if (!step) return;
 
   if (!isResting) {
     // Start rest period
@@ -274,14 +309,14 @@ function onExerciseComplete() {
     timerLabel.classList.add('rest-label');
     timerRingFill.classList.add('rest');
 
-    timer = createTimer(ex.restSec, onTimerTick, onExerciseComplete);
+    timer = createTimer(step.restSec, onTimerTick, onExerciseComplete);
     timer.resume();
     btnPlayPause.textContent = '⏸';
   } else {
-    // Rest is over, move to next exercise
-    if (currentIndex < currentWorkout.exercises.length - 1) {
-      currentIndex++;
-      loadExercise(currentIndex);
+    // Rest is over, move to next step
+    if (currentStepIndex < steps.length - 1) {
+      currentStepIndex++;
+      loadStep(currentStepIndex);
     } else {
       // Workout complete!
       handleWorkoutComplete();
@@ -302,16 +337,17 @@ function handlePlayPause() {
 }
 
 function handlePrev() {
-  if (currentIndex > 0) {
-    currentIndex--;
-    loadExercise(currentIndex);
+  if (currentStepIndex > 0) {
+    currentStepIndex--;
+    loadStep(currentStepIndex);
   }
 }
 
 function handleNext() {
-  if (currentIndex < currentWorkout.exercises.length - 1) {
-    currentIndex++;
-    loadExercise(currentIndex);
+  const steps = currentWorkout.steps || [];
+  if (currentStepIndex < steps.length - 1) {
+    currentStepIndex++;
+    loadStep(currentStepIndex);
   } else {
     handleWorkoutComplete();
   }
@@ -339,6 +375,7 @@ function handleWorkoutComplete() {
   saveWorkoutToHistory({
     date: new Date().toISOString(),
     exercises: currentWorkout.exercises.length,
+    totalSets: currentWorkout.totalSets || currentWorkout.exercises.length,
     totalTimeSec: currentWorkout.totalTimeSec,
     focus: focusLabels[selectedFocus] || selectedFocus,
     level: levelLabels[selectedLevel] || selectedLevel,
@@ -393,13 +430,14 @@ function renderHistory() {
     const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
     const timeStr = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+    const setsInfo = entry.totalSets ? ` (${entry.totalSets} séries)` : '';
     const li = document.createElement('li');
     li.className = 'history-item';
     li.innerHTML = `
       <div class="history-item-icon">🏋️</div>
       <div class="history-item-info">
         <div class="history-item-title">${entry.focus} • ${entry.level}</div>
-        <div class="history-item-meta">${dateStr} às ${timeStr} • ${entry.exercises} exercícios • ${Math.round(entry.totalTimeSec / 60)} min</div>
+        <div class="history-item-meta">${dateStr} às ${timeStr} • ${entry.exercises} exercícios${setsInfo} • ${Math.round(entry.totalTimeSec / 60)} min</div>
       </div>
     `;
     ul.appendChild(li);
