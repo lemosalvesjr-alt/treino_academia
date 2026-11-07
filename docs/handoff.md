@@ -14,7 +14,7 @@ Documento de transição e continuidade entre sessões de desenvolvimento.
 ### B. Versionamento e Repositório GitHub
 * Repositório: [lemosalvesjr-alt/treino_academia](https://github.com/lemosalvesjr-alt/treino_academia)
 * Branch padrão: `main`
-* **Release Oficial**: [v1.0.1](https://github.com/lemosalvesjr-alt/treino_academia/releases/tag/v1.0.1) (anterior: v1.0.0)
+* **Release Oficial**: [v1.1.0](https://github.com/lemosalvesjr-alt/treino_academia/releases/tag/v1.1.0) (anteriores: v1.0.1, v1.0.0)
 
 ---
 
@@ -58,7 +58,7 @@ treino_academia/
 
 ---
 
-## 3. Marcos Alcançados (v1.0.1 / Atual)
+## 3. Marcos Alcançados (v1.1.0)
 
 1. **Correção Biomecânica da Composição de Séries**:
    * Fim do sorteio aleatório infinito de dezenas de exercícios para uma única série.
@@ -66,8 +66,8 @@ treino_academia/
    * Seleção realista de **4 a 8 exercícios principais**, com alternância equilibrada de grupos musculares.
    * **Descansos Realistas e Seguros**: Iniciante (45s), Intermediário (30s), Avançado (20s).
    * O Player Ativo agora gerencia a execução série a série (`Exercício 1 de 6 • Série 1/3`).
-2. **Release Oficial `v1.0.1`**: Tag anotada e Release criada no GitHub.
-3. **Service Worker v5**: Cache atualizado com pré-cache de todas as ilustrações e scripts sincronizados.
+2. **Release Oficial `v1.1.0`**: Tag anotada e Release criada no GitHub.
+3. **Service Worker v5**: Cache atualizado com pré-cache de todas as 216 ilustrações e scripts sincronizados.
 4. **Suíte de Testes Unitários**: 40 testes automatizados cobrindo geração, composição de séries, limites e validações.
 
 ---
